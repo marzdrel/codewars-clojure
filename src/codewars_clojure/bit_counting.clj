@@ -4,6 +4,7 @@
 (use '[clojure.string :only (split)])
 
 (defn count-bits [n]
-  (count (filter (partial = "1")
-                 (split (str (Integer/toBinaryString n))
-                        #""))))
+  (->> (Integer/toBinaryString n)
+       (#(split % #""))
+       (filter partial = "1")
+       (count)))
