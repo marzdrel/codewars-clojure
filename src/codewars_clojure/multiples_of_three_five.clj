@@ -5,10 +5,11 @@
   (or (= 0 (mod n 3)) (= 0 (mod n 5))))
 
 (defn solution [number]
-  (->> (range number)
-       (rest)
+  (->> number
+       range
+       rest
        (filter multiple-of-3-or-5?)
-       (set)
-       (reduce +)))
+       distinct
+       (apply +)))
 
 (solution 10)
