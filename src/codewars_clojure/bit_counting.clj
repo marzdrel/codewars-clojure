@@ -6,5 +6,8 @@
 (defn count-bits [n]
   (->> (Integer/toBinaryString n)
        (#(split % #""))
-       (filter partial = "1")
+       (filter (partial = "1"))
        (count)))
+
+(comment
+  (count-bits 123))
