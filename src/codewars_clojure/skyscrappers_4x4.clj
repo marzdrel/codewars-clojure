@@ -29,13 +29,13 @@
 
 (defn initial-pass [data index clue]
   (let [regenerate
-        (fn [board elem] (assoc board (edge-map index) elem))
+        (fn [elem board] (assoc board (edge-map index) elem))
         without
-        (fn [expr] (remove expr (get data index)))]
+        (fn [expr] (remove expr (get data (edge-map index))))]
     (case clue
-      1 (regenerate (regenerate-row-without 1 #{4} data) '(4))
-      2 (regenerate data (without #{4}))
-      3 (regenerate data (without #{3 4}))
+      1 (regenerate '(4) (regenerate-row-without index #{4} data))
+      2 (regenerate (without #{4}) data)
+      3 (regenerate (without #{3 4}) data)
       data)))
 
 (defn solve-puzzle [clues]
@@ -50,12 +50,11 @@
        (map (partial join " | "))
        (map println)))
 
-; (comment (solve-puzzle '(2 2 1 3 2 2 3 1 1 2 2 3 3 2 1 3)))
-(debug (solve-puzzle '(0 0 1 2 0 2 0 0 0 3 0 0 0 1 0 0)))
-(edge-row 2)
+(debug (solve-puzzle '(2 2 1 3  2 2 3 1  1 2 2 3  3 2 1 3)))
+; (debug (solve-puzzle '(0 0 1 2  0 2 0 0  0 3 0 0  0 1 0 0)))
+; (println (edge-row 15))
 
-(debug
- (->> (generate)
-      (regenerate-row-without 2 #{4})
-      (regenerate-row-without 15 #{2})
-      (regenerate-row-without 5 #{4})))
+; (debug
+;  (->> (generate)
+;       (regenerate-row-without 15 #{3 4})
+;       (regenerate-row-without 0 #{3 4})))
