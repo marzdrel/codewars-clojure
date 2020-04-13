@@ -47,6 +47,21 @@
       3 (regenerate (without #{3 4}) data)
       data)))
 
+(defn edge-piece-distance [state clueindex]
+  (let [row (edge-row clueindex)
+        distance
+        ; (map (partial get state) row)
+        (->> row
+             (map (partial get state))
+             (map-indexed (fn [index heights] [index heights]))
+             (filter (fn [[index heights]] (= 1 (count heights))))
+             (map (fn [[index heights]] [index (first heights)]))
+             (first))]
+    (if (some? distance) distance 0)))
+
+(defn subsequent-pass [board index clue]
+  (do (println (edge-piece-distance board index)) board))
+
 (defn spot-loners [data index]
   (let [soloer (->> (edge-row index)
                     (map (partial get data))
@@ -55,8 +70,7 @@
                     (frequencies)
                     (filter (fn [[k v]] (= v 1)))
                     (ffirst))]
-    (if (nil? soloer)
-      data
+    (if (some? soloer)
       (reduce (fn [data pos]
                 (if (some #{soloer} (get data pos))
                   (->> (assoc data pos (conj () soloer))
@@ -64,7 +78,8 @@
                        reduced)
                   data))
               data
-              (edge-row index)))))
+              (edge-row index))
+      data)))
 
 (defn- debug [list]
   (do (println (apply str (repeat 45 \-)))
@@ -91,7 +106,8 @@
     (->> (vec clues)
          (reduce-kv initial-pass initial-state)
          remove-loners
+         (#(reduce-kv subsequent-pass % (vec clues)))
          debug)))
 
-; (solve-puzzle '(2 2 1 3  2 2 3 1  1 2 2 3  3 2 1 3))
+(solve-puzzle '(2 2 1 3  2 2 3 1  1 2 2 3  3 2 1 3))
 (solve-puzzle '(0 0 1 2  0 2 0 0  0 3 0 0  0 1 0 0))
