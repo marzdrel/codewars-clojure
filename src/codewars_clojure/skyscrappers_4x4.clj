@@ -80,34 +80,20 @@
            (println))
       list))
 
+(defn remove-loners [data]
+  (let [soloize (fn [state] (reduce spot-loners state (range 8)))]
+    (->> data
+         ((fn [x]
+            (let [result (soloize x)]
+              (if (= result x)
+                result
+                (remove-loners result))))))))
+
 (defn solve-puzzle [clues]
-  (let [init (->> (vec clues)
-                  (reduce-kv initial-pass (generate)))
-        soloize (fn [state] (reduce spot-loners state (range 8)))]
-    (->> init
-         debug
-         soloize
-         debug
-         soloize
-         soloize
-         soloize
-         debug)))
+  (->> (vec clues)
+       (reduce-kv initial-pass (generate))
+       remove-loners
+       debug))
 
-(solve-puzzle '(2 2 1 3  2 2 3 1  1 2 2 3  3 2 1 3))
-
-; (debug
-;  (reduce spot-loners
-;          (solve-puzzle '(2 2 1 3  2 2 3 1  1 2 2 3  3 2 1 3)) (range 7)))
-;
-; (debug
-;  (spot-loners
-;   (solve-puzzle '(2 2 1 3  2 2 3 1  1 2 2 3  3 2 1 3)) 3))
-
-; (debug (solve-puzzle '(0 0 1 2  0 2 0 0  0 3 0 0  0 1 0 0)))
-; (println (edge-row 15))
-; (edge-neighbours 10)
-
-; (debug
-;  (->> (generate)
-;       (regenerate-row-without 15 #{3 4})
-;       (regenerate-row-without 0 #{3 4})))
+; (solve-puzzle '(2 2 1 3  2 2 3 1  1 2 2 3  3 2 1 3))
+(solve-puzzle '(0 0 1 2  0 2 0 0  0 3 0 0  0 1 0 0))
