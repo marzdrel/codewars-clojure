@@ -21,6 +21,10 @@
 ;       (is (= (nth actual 2) '[4 2 3 1]))
 ;       (is (= (nth actual 3) '[1 3 2 4])))))
 
+(deftest edge-neighbours-test
+  (is (= (edge-neighbours 0) [1 2 3 4 8 12]))
+  (is (= (edge-neighbours 10) [8 9 11 2 6 14])))
+
 (deftest edge-map-test
   (is (= (edge-map 0) 0))
   (is (= (edge-map 1) 1))
