@@ -30,7 +30,9 @@
         col (edge-row (mod index 4))]
     (remove #{index} (concat row col))))
 
-(defn throw-neighbours [boardindex expr data]
+(defn throw-neighbours
+  "Remove all pieces in expr from fields adjanced to boardindex"
+  [boardindex expr data]
   (->> (edge-neighbours boardindex)
        (reduce (fn [d i] (assoc d i (remove expr (get d i))))
                data)))
