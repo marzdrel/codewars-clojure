@@ -3,10 +3,7 @@
 (use 'clojure.pprint)
 (use '[clojure.string :only (join split)])
 
-(defn- generate []
-  (vec (repeat 16 (range 1 5))))
-
-(defn edge-map [index]
+(defn edge-position [index]
   (condp > index
     4  index
     8  (+ 3 (* 4 (- index 4)))
@@ -14,7 +11,7 @@
     16 (- 12 (* 4 (- index 12)))))
 
 (defn edge-row [index]
-  (let [start (edge-map index)
+  (let [start (edge-position index)
         mapr #(map % (range 4))]
     (condp > index
       4  (mapr #(+ start (* 4 %)))
@@ -39,13 +36,13 @@
 
 (defn initial-pass [data index clue]
   (let [regenerate
-        (fn [elem board] (assoc board (edge-map index) elem))
+        (fn [elem board] (assoc board (edge-position index) elem))
         without
-        (fn [expr] (remove expr (get data (edge-map index))))]
+        (fn [expr] (remove expr (get data (edge-position index))))]
     (case clue
-      1 (regenerate '(4)
-                    (throw-neighbours (edge-map index)
-                                      #{4} data))
+      1 (->> data
+             (throw-neighbours (edge-position index) #{4})
+             (regenerate '(4)))
       2 (regenerate (without #{4}) data)
       3 (regenerate (without #{3 4}) data)
       data)))
@@ -90,10 +87,11 @@
                 (remove-loners result))))))))
 
 (defn solve-puzzle [clues]
-  (->> (vec clues)
-       (reduce-kv initial-pass (generate))
-       remove-loners
-       debug))
+  (let [initial-state (vec (repeat 16 (range 1 5)))]
+    (->> (vec clues)
+         (reduce-kv initial-pass initial-state)
+         remove-loners
+         debug)))
 
 ; (solve-puzzle '(2 2 1 3  2 2 3 1  1 2 2 3  3 2 1 3))
 (solve-puzzle '(0 0 1 2  0 2 0 0  0 3 0 0  0 1 0 0))
