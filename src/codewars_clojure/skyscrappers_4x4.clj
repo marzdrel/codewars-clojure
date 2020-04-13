@@ -30,8 +30,8 @@
         col (edge-row (mod index 4))]
     (remove #{index} (concat row col))))
 
-(defn regenerate-row-without [index expr data]
-  (->> (edge-neighbours (edge-map index))
+(defn throw-neighbours [boardindex expr data]
+  (->> (edge-neighbours boardindex)
        (reduce (fn [d i] (assoc d i (remove expr (get d i))))
                data)))
 
@@ -41,7 +41,9 @@
         without
         (fn [expr] (remove expr (get data (edge-map index))))]
     (case clue
-      1 (regenerate '(4) (regenerate-row-without index #{4} data))
+      1 (regenerate '(4)
+                    (throw-neighbours (edge-map index)
+                                      #{4} data))
       2 (regenerate (without #{4}) data)
       3 (regenerate (without #{3 4}) data)
       data)))
@@ -56,35 +58,40 @@
                     (ffirst))]
     (if (nil? soloer)
       data
-      (reduce
-       (fn [data pos]
-         (let [cell (get data pos)
-               found (some #{soloer} cell)]
-           (assoc data pos (if found (conj () soloer) cell))))
-       data
-       (edge-row index)))))
+      (reduce (fn [data pos]
+                (if (some #{soloer} (get data pos))
+                  (->> (assoc data pos (conj () soloer))
+                       (throw-neighbours pos #{soloer})
+                       reduced)
+                  data))
+              data
+              (edge-row index)))))
 
 (defn- debug [list]
-  (->> list
-       (map pr-str)
-       (map (partial format "%9s"))
-       (partition 4)
-       (map (partial join " | "))
-       (map println)))
+  (do (println (apply str (repeat 45 \-)))
+      (->> list
+           (map pr-str)
+           (map (partial format "%9s"))
+           (partition 4)
+           (map (partial join " | "))
+           (join "\n")
+           (println))
+      list))
 
 (defn solve-puzzle [clues]
   (let [init (->> (vec clues)
                   (reduce-kv initial-pass (generate)))
         soloize (fn [state] (reduce spot-loners state (range 8)))]
     (->> init
+         debug
+         soloize
+         debug
          soloize
          soloize
          soloize
-         soloize
-         soloize
-         soloize)))
+         debug)))
 
-(debug (solve-puzzle '(2 2 1 3  2 2 3 1  1 2 2 3  3 2 1 3)))
+(solve-puzzle '(2 2 1 3  2 2 3 1  1 2 2 3  3 2 1 3))
 
 ; (debug
 ;  (reduce spot-loners
